@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Jasonette</string>
-    <string name="url">https://jasonette.github.io/Jasonpedia/hello.json</string>
+    <string name="app_name">HomePiRemote</string>
+    <string name="url">http://192.168.1.17:41394/json</string>
     <string name="launch">file://preload.json</string>
 </resources>
