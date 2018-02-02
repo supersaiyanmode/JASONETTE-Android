@@ -28,9 +28,21 @@ abstract class BaseDiscoveryMethod {
 }
 
 class WifiDiscoveryMethod extends BaseDiscoveryMethod {
+    private static final int MAX_TRIES = 3;
+
     @Override
     public ServerSpecification discover(Context context) {
         WifiManager wifiMgr = (WifiManager) context.getSystemService(WIFI_SERVICE);
+        for (int i = 0; i < MAX_TRIES; i++) {
+            ServerSpecification spec = discover(wifiMgr);
+            if (spec != null) {
+                return spec;
+            }
+        }
+        return null;
+    }
+
+    private ServerSpecification discover(WifiManager wifiMgr) {
         byte[] msg = "QUERY".getBytes(Charset.forName("UTF-8"));
         try {
             InetAddress broadcastAddress = getBroadcastAddress(wifiMgr);
@@ -41,7 +53,7 @@ class WifiDiscoveryMethod extends BaseDiscoveryMethod {
 
             byte[] bytes = new byte[1024];
             DatagramPacket resp = new DatagramPacket(bytes, bytes.length);
-            socket.setSoTimeout(10000);
+            socket.setSoTimeout(4000);
             socket.receive(resp);
             String response = new String(resp.getData(), 0, resp.getLength(),
                                          Charset.forName("UTF-8"));
@@ -49,8 +61,8 @@ class WifiDiscoveryMethod extends BaseDiscoveryMethod {
             return spec;
         } catch (IOException e) {
             Log.e("ServerDiscovery", "No clients found.", e);
+            return null;
         }
-        return null;
     }
 
     private InetAddress getBroadcastAddress(WifiManager wifiMgr) throws UnknownHostException {
