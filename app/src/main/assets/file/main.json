@@ -1,0 +1,97 @@
+{
+  "$jason": {
+    "head": {
+      "title": "Stopwatch",
+      "actions": {
+        "$pull": {
+          "type": "$reload"
+        },
+        "$load": {
+          "type": "$set",
+          "options": {
+            "message": "Discovering WeaveServer ...",
+            "spinner": "https://loading.io/spinners/microsoft/lg.rotating-balls-spinner.gif"
+          },
+          "success": {
+            "trigger": "discover"
+          }
+        },
+        "discover": {
+          "type": "$external.invoke",
+          "options": {
+            "method": "com.srivatsaniyer.weaveremote.jasonette.Messaging.discover",
+            "params": [],
+            "block": false
+          },
+          "success": {
+            "type": "$href",
+            "options": {
+              "url": "http://{{$jason.url}}:5000/root.json"
+            }
+          },
+          "error": {
+            "type": "$set",
+            "options": {
+              "message": "No server found. Pull down and refresh to retry discovery.",
+              "spinner": ""
+
+            },
+            "success": {
+              "type": "$render"
+            }
+          }
+        }
+      },
+      "templates": {
+        "body": {
+          "background": "#000000",
+          "header": {
+            "title": "HomeWeave",
+            "style": {
+              "background": "#000000",
+              "color": "#ffffff",
+              "height": "50%"
+            }
+          },
+          "sections": [
+            {
+              "items": [
+                {
+                  "type": "vertical",
+                  "style": {
+                    "align": "center",
+                    "spacing": "10"
+                  },
+                  "components": [
+                    {
+                      "type": "space",
+                      "style": {
+                        "height": "60%"
+                      }
+                    },
+                    {
+                      "type": "image",
+                      "url": "{{$get.spinner}}",
+                      "style": {
+                        "width": "20%",
+                        "height": "20%"
+                      }
+                    },
+                    {
+                      "type": "label",
+                      "text": "{{$get.message}}",
+                      "style": {
+                        "color": "#ffffff",
+                        "align": "center"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  }
+}

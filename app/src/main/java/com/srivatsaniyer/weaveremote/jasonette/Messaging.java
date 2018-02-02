@@ -4,6 +4,9 @@ import android.content.Context;
 
 import com.srivatsaniyer.piremote.messaging.ServerSpecification;
 import com.srivatsaniyer.piremote.messaging.discovery.DiscoverMessageServer;
+import com.srivatsaniyer.piremote.rpc.API;
+import com.srivatsaniyer.piremote.rpc.RPC;
+import com.srivatsaniyer.piremote.rpc.RPCManager;
 
 import org.json.JSONException;
 import org.json.JSONObject;
