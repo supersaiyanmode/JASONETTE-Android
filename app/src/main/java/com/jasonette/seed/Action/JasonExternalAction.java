@@ -20,91 +20,33 @@ import java.util.List;
 import java.util.Map;
 
 /*
- * Stores the parameters so that MethodInvocation class can invoke call(..) which invokesr
- * JasonHelper.next(..) with those parameters.
- */
-class InvocationCallback {
-    InvocationCallback(final String type, final JSONObject action, final JSONObject event,
-                       final Context context) {
-        this.type = type;
-        this.action = action;
-        this.event = event;
-        this.context = context;
-    }
-
-    public void call(final JSONObject data) {
-        JasonHelper.next(type, action, data, event, context);
-    }
-
-    private final String type;
-    private final JSONObject action;
-    private final JSONObject event;
-    private final Context context;
-}
-
-/*
- * The runnable calls 'method' on the instance 'object' with the parameters 'params' unwrapped.
- * The method should always return a JSONObject. The object returned by the function should
- * have the following attributes:
- *   - "result": True/False. If this field is true, success callback will be invoked, else error
- *               callback.
- *   - "data"  : Optional. The data being passed to the downstream processes.
- *
- * In case of any exceptions in the invocation, error callback will be called.
- */
-class MethodInvocation implements Runnable {
-    private final Method method;
-    private final Object[] params;
-    private final Object object;
-    private final InvocationCallback success;
-    private final InvocationCallback error;
-
-    MethodInvocation(final Object object, final Method method, Object[] params,
-                     final InvocationCallback success, final InvocationCallback error) {
-        this.object = object;
-        this.method = method;
-        this.params = params;
-        this.success = success;
-        this.error = error;
-    }
-
-    @Override
-    public void run() {
-        final JSONObject res;
-        try {
-            res = (JSONObject) method.invoke(object, params);
-        } catch (Exception e) {
-            Log.e("JasonExternalAction", "Method invocation failed.", e);
-            error.call(new JSONObject());
-            return;
-        }
-
-        if (res.optBoolean("result", false)) {
-            final JSONObject data = res.optJSONObject("data");
-            success.call(data == null? new JSONObject() : data);
-        } else {
-            final JSONObject data = res.optJSONObject("data");
-            error.call(data == null? new JSONObject() : data);
-        }
-    }
-}
-
-/*
  * The action can be invoked like:
  * {
- *   "method": "my.package.Class.public_method",
- *   "params": [
- *      "I can pass any JSON object here",  // This will be translated to String.
- *      1.2,
- *      ["hello", "world"],   // Translated to List
- *      {"a": "b", "c": "d"}  // Translated to Map.
- *   ],
- *   "block": false,   // Call blocks. Default false.
- *   "cacheObject": true,  // The instance of my.package.Class will be cached and no new instances
- *                         // will be created for every invocation.
- *  "success": { ...  },
- *  "error": { ...  }
+ *   "type": "$external.invoke",
+ *   "options": {
+ *      "method": "my.package.Class.public_method",
+ *      "params": [
+ *          "I can pass any JSON object here",  // This will be translated to String.
+ *          1.2,
+ *          ["hello", "world"],   // Translated to List if convertJson below is set to false.
+ *          {"a": "b", "c": "d"}  // Translated to Map if convertJson below is set to false.
+ *      ],
+ *      "block": false,           // Call blocks. Default false.
+ *      "cacheObject": true,      // The instance of my.package.Class will be cached and no new
+ *                                // instances will be created for every invocation.
+ *      "convertJson": false      // Convert JSONObjects/JSONArrays in the params above to Java
+ *                                // equivalents. Note this will not recurse into deeper levels.
+ *   }
+ *   "success": { ...  },
+ *   "error": { ...  }
  * }
+ *
+ * The object and the array above get converted to a Map<String, JSONObject> and List<JSONObject>
+ * respectively because the attribute convertJson is set. If this is unset, the method should
+ * accept org.json.* instances.
+ *
+ * The "success", and "error" actions will be processed in blocking or non-blocking fashion
+ * according to the value of "block".
  */
 public class JasonExternalAction {
     public JasonExternalAction() {
@@ -118,10 +60,10 @@ public class JasonExternalAction {
         final JSONObject options;
         final JSONArray params;
         final String method;
-        boolean isBlocking, cacheObject;
+        boolean isBlocking, cacheObject, convertJson;
         final Object object;
         final Method m;
-        Object[] translatedParams;
+        final Object[] translatedParams;
 
         try {
             options = action.getJSONObject("options");
@@ -129,9 +71,10 @@ public class JasonExternalAction {
             params = options.getJSONArray("params");
             isBlocking = options.optBoolean("block", false);
             cacheObject = options.optBoolean("cacheObject", true);
+            convertJson = options.optBoolean("convertJson", true);
 
             object = getObject(method, cacheObject, context);
-            translatedParams = translateParams(params);
+            translatedParams = translateParams(params, convertJson);
             m = getMethod(object, method, translatedParams);
         } catch (Exception e) {
             // Any 'internal' error above need not propagate to the front end.
@@ -140,15 +83,40 @@ public class JasonExternalAction {
             return;
         }
 
-        final InvocationCallback success = new InvocationCallback("success", action, event, context);
-        final InvocationCallback error = new InvocationCallback("error", action, event, context);
-
-        Runnable runnable = new MethodInvocation(object, m, translatedParams, success, error);
-
         if (isBlocking) {
-            runnable.run();
+            try {
+                final JSONObject res = (JSONObject) m.invoke(object, translatedParams);
+                JasonHelper.next("success", action, res, event, context);
+            } catch (Exception e) {
+                Log.e("JasonExternalAction", "Method invocation failed.", e);
+                JasonHelper.next("error", action, new JSONObject(), event, context);
+                return;
+            }
         } else {
-            handler.post(runnable);
+            // In case of no block, unlock the chaining.
+            JasonHelper.next("dummy", new JSONObject(), new JSONObject(), event, context);
+
+            // Call $render.
+            JasonHelper.next("success", RENDER_ACTION, new JSONObject(), event, context);
+
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    final JSONObject res;
+                    try {
+                        res = (JSONObject) m.invoke(object, translatedParams);
+                        // Condition required so that re-unlock doesn't happen in this async call.
+                        if (action.has("success")) {
+                            JasonHelper.next("success", action, res, event, context);
+                        }
+                    } catch (Exception e) {
+                        Log.e("JasonExternalAction", "Method invocation failed.", e);
+                        if (action.has("error")) {
+                            JasonHelper.next("error", action, data, event, context);
+                        }
+                    }
+                }
+            });
         }
     }
 
@@ -214,21 +182,21 @@ public class JasonExternalAction {
      * Converts parameters from JSON world to Java world. JSONArray maps to ArrayList, JSONObject maps to
      * HashMap<String, Object>
      */
-    private Object[] translateParams(final JSONArray params) throws JSONException {
+    private Object[] translateParams(final JSONArray params, boolean convertJson) throws JSONException {
         final Object[] result = new Object[params.length()];
         for (int i = 0; i < params.length(); i++) {
             Object value = params.get(i);
 
             if (value instanceof Integer || value instanceof String || value instanceof Double) {
                 // We are good.
-            } else if (value instanceof JSONArray) {
+            } else if (convertJson && value instanceof JSONArray) {
                 JSONArray jsonArr = (JSONArray) value;
                 List<Object> res = new ArrayList<>(jsonArr.length());
                 for (int j = 0; j < jsonArr.length(); j++) {
                     res.add(jsonArr.get(j));
                 }
                 value = res;
-            } else if (value instanceof  JSONObject) {
+            } else if (convertJson && value instanceof  JSONObject) {
                 Map<String, Object> map = new HashMap<String, Object>();
                 JSONObject jsonObj = (JSONObject) value;
                 Iterator<String> iter = jsonObj.keys();
@@ -237,6 +205,8 @@ public class JasonExternalAction {
                     map.put(key, jsonObj.get(key));
                 }
                 value = map;
+            } else if (!convertJson && (value instanceof  JSONArray || value instanceof  JSONObject)) {
+                // Use org.json objects.
             } else {
                 throw new IllegalArgumentException("Unsupported parameter type: " + params.get(i));
             }
@@ -246,6 +216,19 @@ public class JasonExternalAction {
         return result;
     }
 
+
+    private static final JSONObject RENDER_ACTION = new JSONObject();
     private Map<String, Object> objectCache;  // Instantiated objects may be cached.
     private Handler handler;  // All method invocations happen in this Handler's thread.
+
+    static {
+        try {
+            JSONObject render = new JSONObject();
+            render.put("type", "$render");
+            RENDER_ACTION.put("success", render);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
