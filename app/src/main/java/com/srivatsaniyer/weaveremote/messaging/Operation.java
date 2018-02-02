@@ -1,6 +1,6 @@
-package com.srivatsaniyer.piremote.messaging;
+package com.srivatsaniyer.weaveremote.messaging;
 
-import com.srivatsaniyer.piremote.messaging.exceptions.BadOperation;
+import com.srivatsaniyer.weaveremote.messaging.exceptions.BadOperation;
 
 /**
  * Created by sriiyer on 9/23/17.

@@ -1,4 +1,4 @@
-package com.srivatsaniyer.piremote.messaging.discovery;
+package com.srivatsaniyer.weaveremote.messaging.discovery;
 
 import android.content.Context;
 import android.net.DhcpInfo;
@@ -6,7 +6,7 @@ import android.net.wifi.WifiManager;
 import android.util.Log;
 
 import com.google.gson.Gson;
-import com.srivatsaniyer.piremote.messaging.ServerSpecification;
+import com.srivatsaniyer.weaveremote.messaging.ServerSpecification;
 
 import java.io.IOException;
 import java.net.DatagramPacket;

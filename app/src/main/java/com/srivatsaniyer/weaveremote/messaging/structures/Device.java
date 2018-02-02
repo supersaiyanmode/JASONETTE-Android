@@ -1,4 +1,4 @@
-package com.srivatsaniyer.piremote.messaging.structures;
+package com.srivatsaniyer.weaveremote.messaging.structures;
 
 import java.util.List;
 

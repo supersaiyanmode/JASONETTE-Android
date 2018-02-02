@@ -1,4 +1,4 @@
-package com.srivatsaniyer.piremote.messaging.structures;
+package com.srivatsaniyer.weaveremote.messaging.structures;
 
 /**
  * Created by thrustmaster on 9/30/17.

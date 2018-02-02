@@ -1,9 +1,9 @@
-package com.srivatsaniyer.piremote.messaging;
+package com.srivatsaniyer.weaveremote.messaging;
 
 import android.util.Log;
 
 import com.google.gson.reflect.TypeToken;
-import com.srivatsaniyer.piremote.messaging.exceptions.MessagingException;
+import com.srivatsaniyer.weaveremote.messaging.exceptions.MessagingException;
 
 import java.lang.reflect.Type;
 

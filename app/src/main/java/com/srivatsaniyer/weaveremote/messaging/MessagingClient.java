@@ -1,6 +1,6 @@
-package com.srivatsaniyer.piremote.messaging;
+package com.srivatsaniyer.weaveremote.messaging;
 
-import com.srivatsaniyer.piremote.messaging.exceptions.MessagingException;
+import com.srivatsaniyer.weaveremote.messaging.exceptions.MessagingException;
 
 import java.io.BufferedReader;
 import java.io.IOException;

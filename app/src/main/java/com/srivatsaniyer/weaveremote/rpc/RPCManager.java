@@ -1,4 +1,4 @@
-package com.srivatsaniyer.piremote.rpc;
+package com.srivatsaniyer.weaveremote.rpc;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;

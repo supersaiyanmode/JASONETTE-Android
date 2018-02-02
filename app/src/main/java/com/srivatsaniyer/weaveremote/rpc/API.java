@@ -1,4 +1,4 @@
-package com.srivatsaniyer.piremote.rpc;
+package com.srivatsaniyer.weaveremote.rpc;
 
 import java.util.List;
 import java.util.Map;

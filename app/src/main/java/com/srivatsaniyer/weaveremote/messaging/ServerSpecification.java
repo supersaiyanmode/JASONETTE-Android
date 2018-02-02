@@ -1,4 +1,4 @@
-package com.srivatsaniyer.piremote.messaging;
+package com.srivatsaniyer.weaveremote.messaging;
 
 /**
  * Created by sriiyer on 9/23/17.

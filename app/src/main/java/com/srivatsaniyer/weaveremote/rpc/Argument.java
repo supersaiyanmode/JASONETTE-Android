@@ -1,4 +1,4 @@
-package com.srivatsaniyer.piremote.rpc;
+package com.srivatsaniyer.weaveremote.rpc;
 
 /**
  * Created by thrustmaster on 1/21/18.

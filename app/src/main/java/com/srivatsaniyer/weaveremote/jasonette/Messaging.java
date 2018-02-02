@@ -1,12 +1,13 @@
-package com.srivatsaniyer.piremote.jasonette;
+package com.srivatsaniyer.weaveremote.jasonette;
 
 import android.content.Context;
+import android.util.Log;
 
-import com.srivatsaniyer.piremote.messaging.ServerSpecification;
-import com.srivatsaniyer.piremote.messaging.discovery.DiscoverMessageServer;
-import com.srivatsaniyer.piremote.rpc.API;
-import com.srivatsaniyer.piremote.rpc.RPC;
-import com.srivatsaniyer.piremote.rpc.RPCManager;
+import com.srivatsaniyer.weaveremote.messaging.ServerSpecification;
+import com.srivatsaniyer.weaveremote.messaging.discovery.DiscoverMessageServer;
+import com.srivatsaniyer.weaveremote.rpc.API;
+import com.srivatsaniyer.weaveremote.rpc.RPC;
+import com.srivatsaniyer.weaveremote.rpc.RPCManager;
 
 import org.json.JSONException;
 import org.json.JSONObject;

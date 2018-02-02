@@ -1,11 +1,11 @@
-package com.srivatsaniyer.piremote.messaging;
+package com.srivatsaniyer.weaveremote.messaging;
 
-import com.srivatsaniyer.piremote.messaging.exceptions.BadOperation;
-import com.srivatsaniyer.piremote.messaging.exceptions.InvalidMessageStructure;
-import com.srivatsaniyer.piremote.messaging.exceptions.MessagingException;
-import com.srivatsaniyer.piremote.messaging.exceptions.RequiredFieldsMissing;
-import com.srivatsaniyer.piremote.messaging.exceptions.SchemaValidationFailed;
-import com.srivatsaniyer.piremote.messaging.exceptions.WaitTimeoutError;
+import com.srivatsaniyer.weaveremote.messaging.exceptions.BadOperation;
+import com.srivatsaniyer.weaveremote.messaging.exceptions.InvalidMessageStructure;
+import com.srivatsaniyer.weaveremote.messaging.exceptions.MessagingException;
+import com.srivatsaniyer.weaveremote.messaging.exceptions.RequiredFieldsMissing;
+import com.srivatsaniyer.weaveremote.messaging.exceptions.SchemaValidationFailed;
+import com.srivatsaniyer.weaveremote.messaging.exceptions.WaitTimeoutError;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package com.srivatsaniyer.piremote.messaging.exceptions;
+package com.srivatsaniyer.weaveremote.messaging.exceptions;
 
 /**
  * Created by sriiyer on 9/23/17.

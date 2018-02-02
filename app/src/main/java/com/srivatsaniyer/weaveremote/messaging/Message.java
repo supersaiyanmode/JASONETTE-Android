@@ -1,11 +1,11 @@
-package com.srivatsaniyer.piremote.messaging;
+package com.srivatsaniyer.weaveremote.messaging;
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.srivatsaniyer.piremote.messaging.exceptions.InvalidMessageStructure;
-import com.srivatsaniyer.piremote.messaging.exceptions.MessagingException;
-import com.srivatsaniyer.piremote.messaging.exceptions.RequiredFieldsMissing;
+import com.srivatsaniyer.weaveremote.messaging.exceptions.InvalidMessageStructure;
+import com.srivatsaniyer.weaveremote.messaging.exceptions.MessagingException;
+import com.srivatsaniyer.weaveremote.messaging.exceptions.RequiredFieldsMissing;
 
 import java.io.BufferedReader;
 import java.io.IOException;
