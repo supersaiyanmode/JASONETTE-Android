@@ -29,12 +29,16 @@ public class Messaging {
     }
 
     public JSONObject discover() throws JSONException {
+        Log.i("WEAVEAPP", "Discovery started.");
         spec = new DiscoverMessageServer(this.context).discover();
 
-        final JSONObject res = new JSONObject();
-        res.put("result", spec != null);
-        res.put("data", spec.toString());
-        return res;
+        if (spec == null) {
+            throw new RuntimeException("Server not found.");
+        }
+
+        final JSONObject urlObj = new JSONObject();
+        urlObj.put("url", spec.getHost());
+        return urlObj;
     }
 
     public JSONObject rpc(final String rpcName, final String apiName, final List<Object> args,
